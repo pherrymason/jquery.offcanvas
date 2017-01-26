@@ -1,0 +1,236 @@
+@off-canvas-width : 440px;
+@off-canvas-zindex-base : 1001;
+
+// MIXINS
+// 
+.clearfix() {
+  &:before,
+  &:after {
+    content: " "; // 1
+    display: table; // 2
+  }
+  &:after {
+    clear: both;
+  }
+}
+
+// Box-shadow
+.box-shadow(@shadow) {
+  -webkit-box-shadow: @shadow; // iOS <4.3 & Android <4.1
+          box-shadow: @shadow;
+}
+
+// Transitions
+.transition(@transition) {
+  -webkit-transition: @transition;
+       -o-transition: @transition;
+          transition: @transition;
+}
+
+.transform(@transition) {
+  -webkit-transform: @transition;
+     -moz-transform: @transition;
+       -o-transform: @transition;
+          transform: @transition;
+}
+
+
+// Box sizing
+.box-sizing(@boxmodel) {
+  -webkit-box-sizing: @boxmodel;
+     -moz-box-sizing: @boxmodel;
+          box-sizing: @boxmodel;
+}
+
+// Remove transition flicker on phones
+.kill-flicker{
+	-webkit-backface-visibility : hidden;
+}
+
+.translate3d(@tx,@ty,@tz) {
+      -ms-transform: translate(@tx,@ty);
+  -webkit-transform: translate3d(@tx,@ty,@tz);
+     -moz-transform: translate3d(@tx,@ty,@tz);
+      -ms-transform: translate3d(@tx,@ty,@tz);
+       -o-transform: translate3d(@tx,@ty,@tz);
+          transform: translate3d(@tx,@ty,@tz)
+}
+
+.base{
+	position : relative;
+	width    : 100%;
+}
+
+
+
+
+
+
+
+// OFF CANVAS WRAP
+// Wrap visible content and prevent scroll bars
+.sp-off-canvas-wrap{
+	.kill-flicker;
+	.base;
+	overflow : hidden;
+}
+
+
+
+// INNER WRAP
+// Main content area that moves to reveal the off-canvas content
+.sp-off-canvas-inner-wrap{
+	.kill-flicker;
+	.base;
+	.clearfix();
+
+	-webkit-transition: -webkit-transform 500ms ease;
+	-moz-transition: -moz-transform 500ms ease;
+	-ms-transition: -ms-transform 500ms ease;
+	-o-transition: -o-transform 500ms ease;
+	transition: transform 500ms ease;
+}
+
+.off-canvas-side (@position){
+	.kill-flicker;
+	*{
+		.kill-flicker;
+	}
+	width : 80%;
+
+	@media (min-width:@screen-sm-min){
+		width : @off-canvas-width;
+	}
+
+	top   : 0;
+	bottom: 0;
+	position : absolute;
+	overflow-x : hidden;
+	overflow-y : auto;
+	z-index    : @off-canvas-zindex-base;
+	.transition(transform 500ms ease 0s);
+	-webkit-overflow-scrolling : touch;
+	-ms-overflow-style         : -ms-autohiding-scrollbar;
+	.off-canvas-side-position(@position)
+}
+
+	.off-canvas-side-position(@position) when(@position=left){
+		.translate3d(-100%,0,0);
+		left : 0;
+	}
+	.off-canvas-side-position(@position) when(@position=right){
+		right : 0;
+		.translate3d(100%,0,0);
+	}
+
+
+
+
+.sp-left-off-canvas{
+	.off-canvas-side(left);
+}
+.sp-right-off-canvas{
+	.off-canvas-side(right);
+}
+
+
+.sp-off-canvas-wrap{
+
+	&.move-right,
+	&.move-left,
+	&.move-inner-right,
+	&.move-inner-left,
+	&.offcanvas-overlap-left,
+	&.offcanvas-overlap-right{
+		.sp-exit-off-canvas{
+			.back-link;
+		}
+	}
+}
+
+
+.back-link{
+	.kill-flicker;
+	.transition(background 300ms ease);
+	cursor : pointer;
+	.box-shadow(~"-4px 0 4px rgba(0,0,0,0, 0.5), 4px 0 4px rgba(0,0,0,0, 0.5)");
+
+	// Fill the screen
+	display : block;
+	position: absolute;
+	background : rgba(255,255,255,.2);
+	top			: 0;
+	bottom		: 0;
+	left		: 0;
+	right		: 0;
+	z-index		: @off-canvas-zindex-base + 2;
+	-webkit-tap-highlight-color: rgba(0,0,0,0);
+}
+
+
+
+
+
+// ANIMATIONS
+// ----------
+.sp-off-canvas-wrap{
+	&.move-right,
+	&.move-left{
+		min-height : 100%;
+		-webkit-overflow-scrolling: touch;	// ???
+	}
+
+	&.move-right > .sp-off-canvas-inner-wrap,
+	&.move-inner-right > .sp-off-canvas-inner-wrap{
+		.translate3d(80%,0,0);
+
+		@media (min-width:@screen-sm-min){
+			.translate3d(@off-canvas-width,0,0);
+		}
+	}
+
+	&.move-left > .sp-off-cavnas-inner-wrap,
+	&.move-inner-left > .sp-off-canvas-inner-wrap{
+		.translate3d(-80%,0,0);
+
+		@media (min-width:@screen-sm-min){
+			.translate3d(-1*@off-canvas-width,0,0);
+		}
+	}
+
+	&.move-inner-left{
+		.sp-right-off-canvas{
+			z-index : 0;
+			.transform(none);
+		}
+	}
+	
+	&.move-inner-right{
+		.sp-left-off-canvas{
+			z-index : 0;
+			.transform(none);
+		}
+	}
+
+	&.offcanvas-overlap-left{
+		.sp-right-off-canvas{
+			.transform(none);
+			z-index : @off-canvas-zindex-base+2;
+		}
+	}
+
+	&.offcanvas-overlap-right{
+		.sp-left-off-canvas{
+			.transform(none);
+			z-index : @off-canvas-zindex-base+2;
+		}
+	}
+}
+ // Older browsers
+.no-csstransforms {
+	.sp-left-off-canvas  { left: -(@off-canvas-width); }
+	.sp-right-off-canvas { right: -(@off-canvas-width); }
+
+	.move-left > .sp-off-canvas-inner-wrap { right: @off-canvas-width; }
+	.move-right > .sp-off-canvas-inner-wrap { left: @off-canvas-width; }
+}
